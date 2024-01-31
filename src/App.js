@@ -1,13 +1,13 @@
 import { ProvideAuth } from './hooks/useAuth';
-import LoginForm from './components/LoginForm'
+import { BrowserRouter } from "react-router-dom";
+import AppRoutes from "./routes/routes";
 
 function App() {
   return (
     <ProvideAuth>
-      <div>
-        hahaha
-        <LoginForm></LoginForm>
-      </div>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
     </ProvideAuth>
   );
 }
