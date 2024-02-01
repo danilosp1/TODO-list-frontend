@@ -97,6 +97,20 @@ export const updateTodoList = async (listId, itemsData) => {
     }
 }
 
+export const createTodoList = async (listData) => {
+    try {
+        const response = await axios({
+            method: 'post',
+            url: API_URL + 'todolists/',
+            headers: {},
+            data: listData
+        })
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
 export const updateTodoitem = async (listId, itemsData) => {
     try {
         const response = await axios({
@@ -122,12 +136,39 @@ export const updateTodoListOrder = async (listId, itemIds) => {
     }
 };
 
+export const deleteTodoList = async (listId) => {
+    try {
+        const response = await axios({
+            method: 'delete',
+            url: API_URL + 'todolists/' + listId,
+            headers: {}
+        })
+        return response.data
+    } catch (error) {
+        throw error;
+    }
+}
+
 export const deleteTodoTask = async (itemId) => {
     try {
         const response = await axios({
             method: 'delete',
             url: API_URL + 'todoitems/' + itemId,
             headers: {}
+        })
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const createTodoTask = async (itemsData) => {
+    try {
+        const response = await axios({
+            method: 'post',
+            url: API_URL + 'todoitems/',
+            headers: {},
+            data: itemsData
         })
         return response.data;
     } catch (error) {

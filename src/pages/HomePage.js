@@ -12,6 +12,8 @@ const Home = () => {
     const navigate = useNavigate();
     const [todoLists, setTodoLists] = useState([]);
     const [todoItems, setTodoItems] = useState({});
+    const [modal, setModal] = useState(false);
+    const [inputValue, setInputValue] = useState("");
     const userId = localStorage.getItem('authId')
 
     useEffect(() => {
@@ -40,7 +42,7 @@ const Home = () => {
     useEffect(() => {
         const updateData = async () => {
             try {
-                for(const key of Object.keys(todoItems)){
+                for (const key of Object.keys(todoItems)) {
                     const item = todoLists.find((value) => value._id === key);
 
                     await api.updateTodoList(key, { title: item.title, items: todoItems[key].map(item => item._id) });
@@ -50,7 +52,7 @@ const Home = () => {
                 console.error("Erro ao atualizar dados:", error);
             }
         }
-
+        console.log(todoLists)
         updateData();
     }, [todoItems, todoLists])
 
@@ -61,6 +63,47 @@ const Home = () => {
             return newList;
         });
     };
+
+    const handleDeleteList = (listRemoved) => {
+        setTodoLists(prevState => {
+            const newList = [ ...prevState ];
+            console.log(listRemoved)
+            const index = newList.findIndex((item) => item._id === listRemoved._id)
+            newList.splice(index, 1);
+            return newList;
+        })
+    }
+
+    const handleCreateTask = (listId, task) => {
+        setTodoItems(prevState => {
+            const newList = { ...prevState };
+            newList[listId].push(task);
+            return newList;
+        })
+    }
+
+    const handleCreateList = async () => {
+        try {
+            const newList = await api.createTodoList({title: inputValue, userId: userId});
+            console.log(newList);
+            setTodoLists([...todoLists, newList]);
+        } catch (error) {
+            console.error("Erro ao criar lista:", error)
+        }
+        
+        console.log(todoLists)
+
+        setInputValue("");
+        handleCloseModal();
+    }
+
+    const handleOpenModal = () => {
+        setModal(true);
+    }
+
+    const handleCloseModal = () => {
+        setModal(false);
+    }
 
     const onDragEnd = async (result) => {
         const { destination, source, draggableId } = result;
@@ -101,8 +144,6 @@ const Home = () => {
             const finishListItems = Array.from(finishList);
             const movedItem = startListItems[source.index];
 
-            console.log(movedItem)
-
             startListItems.splice(source.index, 1);
             finishListItems.splice(destination.index, 0, movedItem);
 
@@ -125,7 +166,7 @@ const Home = () => {
     };
 
     return (
-        <div className='bg-primary-400 w-full h-full min-h-screen flex flex-col'>
+        <div className='bg-primary-400 w-[100%] h-full min-h-screen flex flex-col'>
             <Header></Header>
             <div className='w-full h-full flex flex-col md:flex-row'>
                 {
@@ -137,14 +178,36 @@ const Home = () => {
                                 todoLists.map((column) => {
                                     const tasks = todoItems[column._id];
                                     if (tasks) {
-                                        return <TodoList key={column._id} column={column} tasks={tasks} onDeleteTask={handleDeleteTask} />
+                                        return <TodoList key={column._id} column={column} tasks={tasks} onDeleteTask={handleDeleteTask} onCreateTask={handleCreateTask} onDeleteList={handleDeleteList} />
                                     } else {
                                         return <div></div>
                                     }
                                 })
                             }
-                            <div className='m-2 text-2xl border-2 border-quaternary-400 rounded-sm sm:min-w-64 hover:bg-secondary-200 bg-tertiary-200 transition-all hover:cursor-pointer hover:rounded-2xl flex items-center justify-center text-center font-bold pt-1'>
-                                +
+                            <div className='m-2 text-2xl sm:min-w-64 font-bold relative'>
+                                {
+                                    modal ?
+                                        (
+                                            <div className='absolute w-full h-full bg-secondary-200 border-2 z-10 border-quaternary-400 rounded-sm flex flex-col items-center'>
+                                                <div className='m-2 text-quaternary-400 text-xl'>Adicionar lista</div>
+                                                <div className='mb-2 text-quaternary-400 text-base'>título</div>
+
+                                                <input onChange={(e) => setInputValue(e.target.value)} value={inputValue} className='p-3 rounded-2xl focus:rounded-lg transition-all outline-none text-base' type="text" />
+
+                                                <div className='mt-4 flex flex-row text-text-50 gap-4 text-base'>
+                                                    <button onClick={handleCreateList} className='border-2 border-quaternary-400 bg-secondary-200 hover:bg-tertiary-200 transition-all hover:cursor-pointer hover:rounded-2xl p-2 mb-2 flex items-center justify-center text-center font-bold pt-1 w-full text-quaternary-400'>Adicionar</button>
+
+                                                    <button onClick={handleCloseModal} className='border-2 border-quaternary-400 bg-delete-400 transition-all hover:cursor-pointer hover:rounded-2xl p-2 mb-2 flex items-center justify-center text-center font-bold pt-1 w-full text-text-50'>Cancelar</button>
+                                                </div>
+                                            </div>
+                                        )
+                                        :
+                                        (
+                                            <button onClick={handleOpenModal} className='flex items-center justify-center text-center w-full h-full border-2 border-quaternary-400 rounded-sm hover:bg-secondary-200 bg-tertiary-200 transition-all hover:cursor-pointer hover:rounded-2xl'>
+                                                +
+                                            </button>
+                                        )
+                                }
                             </div>
                         </DragDropContext>)
                         :

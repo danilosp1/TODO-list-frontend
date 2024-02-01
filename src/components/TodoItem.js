@@ -6,7 +6,6 @@ import * as api from '../utils/api';
 import React, { useState } from 'react';
 
 const TodoItem = ({ task, index, onDeleteTask }) => {
-    console.log(onDeleteTask)
     const [completed, setCompleted] = useState(task.completed)
 
     const styles = {
@@ -17,8 +16,6 @@ const TodoItem = ({ task, index, onDeleteTask }) => {
     const changeCompleted = async () => {
         try {
             const item = await api.fetchTodoItem(task._id);
-            console.log(task._id)
-            console.log(item)
 
             await api.updateTodoitem(task._id, { content: item.content, completed: !item.completed, list: item.list});
 
