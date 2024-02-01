@@ -53,7 +53,7 @@ export const fetchTodoItem = async (itemId) => {
     try {
         const response = await axios({
             method: 'get',
-            url: API_URL + 'todoitems/' + userId,
+            url: API_URL + 'todoitems/' + itemId,
             headers: {
             },
         })
@@ -85,6 +85,22 @@ export const updateTodoList = async (listId, itemsData) => {
     try {
         const response = await axios({
             method: 'put',
+            url: API_URL + 'todolists/' + listId,
+            headers: {
+            },
+            data: itemsData
+        })
+        return response.data;
+    } catch (error) {
+        console.error("Erro ao buscar as Todo Lists:", error);
+        throw error;
+    }
+}
+
+export const updateTodoitem = async (listId, itemsData) => {
+    try {
+        const response = await axios({
+            method: 'put',
             url: API_URL + 'todoitems/' + listId,
             headers: {
             },
@@ -97,3 +113,24 @@ export const updateTodoList = async (listId, itemsData) => {
     }
 }
 
+export const updateTodoListOrder = async (listId, itemIds) => {
+    try {
+        const response = await axios.post(`${API_URL}todolists/${listId}/updateOrder`, { itemIds });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const deleteTodoTask = async (itemId) => {
+    try {
+        const response = await axios({
+            method: 'delete',
+            url: API_URL + 'todoitems/' + itemId,
+            headers: {}
+        })
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}

@@ -22,6 +22,9 @@ module.exports = {
       'quaternary': {
         400: '#303036',
       },
+      'delete': {
+        400: '#903036'
+      },
       'text': {
         50: '#FFFFFE',
         100: '#000000'

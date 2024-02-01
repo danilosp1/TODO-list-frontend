@@ -37,6 +37,31 @@ const Home = () => {
         loadData();
     }, [auth.id]);
 
+    useEffect(() => {
+        const updateData = async () => {
+            try {
+                for(const key of Object.keys(todoItems)){
+                    const item = todoLists.find((value) => value._id === key);
+
+                    await api.updateTodoList(key, { title: item.title, items: todoItems[key].map(item => item._id) });
+                }
+
+            } catch (error) {
+                console.error("Erro ao atualizar dados:", error);
+            }
+        }
+
+        updateData();
+    }, [todoItems, todoLists])
+
+    const handleDeleteTask = (listId, taskId) => {
+        setTodoItems(prevState => {
+            const newList = { ...prevState };
+            newList[listId] = newList[listId].filter(task => task._id !== taskId);
+            return newList;
+        });
+    };
+
     const onDragEnd = async (result) => {
         const { destination, source, draggableId } = result;
 
@@ -53,9 +78,9 @@ const Home = () => {
 
         // Movendo dentro da mesma lista
         if (startList === finishList) {
-            const newList = Array.from(startList);
-            newList.splice(source.index, 1);
-            newList.splice(destination.index, 0, draggableId);
+            const newList = todoItems[source.droppableId];
+            const changedItem = newList.splice(source.index, 1);
+            newList.splice(destination.index, 0, changedItem[0]);
 
             const newTodoItems = {
                 ...todoItems,
@@ -63,13 +88,20 @@ const Home = () => {
             };
 
             setTodoItems(newTodoItems);
-            
-            await api.updateTodoList(source.droppableId, {title: startList.title, items: newList.map(item => item.id)});
+
+            try {
+                await api.updateTodoListOrder(source.droppableId, newList.map(item => item._id));
+            } catch (error) {
+                console.error("Erro ao atualizar a ordem dos itens na lista:", error);
+            }
+
         } else {
             // Movendo de uma lista para outra
             const startListItems = Array.from(startList);
             const finishListItems = Array.from(finishList);
             const movedItem = startListItems[source.index];
+
+            console.log(movedItem)
 
             startListItems.splice(source.index, 1);
             finishListItems.splice(destination.index, 0, movedItem);
@@ -82,8 +114,13 @@ const Home = () => {
 
             setTodoItems(newTodoItems);
 
-            await api.updateTodoList(source.droppableId, {title: startList.title, items: startListItems.map(item => item.id)});
-            await api.updateTodoList(destination.droppableId, {title: startList.title, items: finishListItems.map(item => item.id)});
+            try {
+                const item = await api.fetchTodoItem(movedItem._id);
+
+                await api.updateTodoitem(item._id, { content: item.content, completed: item.completed, list: destination.droppableId });
+            } catch (error) {
+                console.error("Erro ao atualizar listas:", error);
+            }
         }
     };
 
@@ -99,9 +136,8 @@ const Home = () => {
                             {
                                 todoLists.map((column) => {
                                     const tasks = todoItems[column._id];
-                                    console.log(tasks)
                                     if (tasks) {
-                                        return <TodoList key={column._id} column={column} tasks={tasks} />
+                                        return <TodoList key={column._id} column={column} tasks={tasks} onDeleteTask={handleDeleteTask} />
                                     } else {
                                         return <div></div>
                                     }

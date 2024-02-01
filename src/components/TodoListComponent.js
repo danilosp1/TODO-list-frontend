@@ -2,7 +2,7 @@ import React from 'react';
 import TodoItem from './TodoItem'
 import { Droppable } from 'react-beautiful-dnd'
 
-const TodoList = ({ column, tasks }) => {
+const TodoList = ({ column, tasks, onDeleteTask }) => {
 
     if (!column) {
         return null;
@@ -20,11 +20,11 @@ const TodoList = ({ column, tasks }) => {
                         {...provided.droppableProps}
                         className='p-2 text-quaternary-400 text-xl'
                     >
-                        {tasks.map((task, index) => <TodoItem key={task._id} task={task} index={index}></TodoItem>)}
+                        {tasks.map((task, index) => <TodoItem key={task._id} task={task} index={index} onDeleteTask={onDeleteTask}></TodoItem>)}
                         {provided.placeholder}
-                        <div className='border-2 border-quaternary-400 bg-secondary-200 hover:bg-tertiary-200 transition-all hover:cursor-pointer hover:rounded-2xl p-2 mb-2 flex items-center justify-center text-center font-bold pt-1'>
+                        <button className='border-2 border-quaternary-400 bg-secondary-200 hover:bg-tertiary-200 transition-all hover:cursor-pointer hover:rounded-2xl p-2 mb-2 flex items-center justify-center text-center font-bold pt-1 w-full'>
                             +
-                        </div>
+                        </button>
                     </div>
                 )}
             </Droppable>
