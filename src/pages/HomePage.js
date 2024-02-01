@@ -16,6 +16,7 @@ const Home = () => {
     const [inputValue, setInputValue] = useState("");
     const userId = localStorage.getItem('authId')
 
+    // Hook para receber as listas e itens do usuário a partir da API
     useEffect(() => {
         const loadData = async () => {
             try {
@@ -39,6 +40,7 @@ const Home = () => {
         loadData();
     }, [auth.id]);
 
+    // Hook para atualizar as informações das Lists de forma periódica no BD
     useEffect(() => {
         const updateData = async () => {
             try {
@@ -56,6 +58,15 @@ const Home = () => {
         updateData();
     }, [todoItems, todoLists])
 
+    // Handlers para criação e remoção de Itens dos hooks
+    const handleCreateTask = (listId, task) => {
+        setTodoItems(prevState => {
+            const newList = { ...prevState };
+            newList[listId].push(task);
+            return newList;
+        })
+    }
+
     const handleDeleteTask = async (taskId) => {
         let taskAtual;
         for (const key of Object.keys(todoItems)) {
@@ -72,23 +83,17 @@ const Home = () => {
         });
     };
 
-    const handleDeleteList = (listRemoved) => {
-        setTodoLists(prevState => {
-            const newList = [ ...prevState ];
-            const index = newList.findIndex((item) => item._id === listRemoved._id)
-            newList.splice(index, 1);
-            return newList;
-        })
-    }
-
-    const handleCreateTask = (listId, task) => {
+    // Handler para atualizar o state dos itens (completed)
+    const handleChangeCompleted = (listId, task) => {
         setTodoItems(prevState => {
             const newList = { ...prevState };
+            newList[listId] = newList[listId].filter(value => value._id !== task._id);
             newList[listId].push(task);
             return newList;
-        })
+        });
     }
 
+    // Handlers para criação e remoção de Lists dos hooks
     const handleCreateList = async (e) => {
         e.preventDefault()
         try {
@@ -107,6 +112,16 @@ const Home = () => {
         handleCloseModal();
     }
 
+    const handleDeleteList = (listRemoved) => {
+        setTodoLists(prevState => {
+            const newList = [ ...prevState ];
+            const index = newList.findIndex((item) => item._id === listRemoved._id)
+            newList.splice(index, 1);
+            return newList;
+        })
+    }
+
+    // Handlers para controle de modal
     const handleOpenModal = () => {
         setModal(true);
     }
@@ -115,15 +130,8 @@ const Home = () => {
         setModal(false);
     }
 
-    const handleChangeCompleted = (listId, task) => {
-        setTodoItems(prevState => {
-            const newList = { ...prevState };
-            newList[listId] = newList[listId].filter(value => value._id !== task._id);
-            newList[listId].push(task);
-            return newList;
-        });
-    }
-
+    
+    // Função que configura o drag and drop dos itens entre as listas
     const onDragEnd = async (result) => {
         const { destination, source, draggableId } = result;
 

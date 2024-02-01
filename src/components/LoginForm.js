@@ -8,6 +8,7 @@ function LoginForm() {
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
+    // Handler para login do usuário
     const handleLogin = async (e) => {
         e.preventDefault()
         try {
@@ -19,6 +20,7 @@ function LoginForm() {
         }
     };
 
+    // Handler para logout do usuário
     const handleLogout = () => {
         auth.logout();
         console.log('Usuário deslogado.');

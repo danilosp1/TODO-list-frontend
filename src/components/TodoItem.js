@@ -13,6 +13,7 @@ const TodoItem = ({ task, index, onDeleteTask, onChangeCompleted }) => {
         complete: 'border-2 border-quaternary-400 rounded-sm p-2 mb-2 flex flex-row items-center justify-between bg-secondary-200 line-through'
     }
 
+    // Responsável por alterar o status de completed do item
     const changeCompleted = async () => {
         try {
             const item = await api.fetchTodoItem(task._id);
@@ -27,6 +28,7 @@ const TodoItem = ({ task, index, onDeleteTask, onChangeCompleted }) => {
         }
     }
 
+    // Handler para deletar item
     const handleDelete = async () => {
         try {
             await api.deleteTodoTask(task._id);

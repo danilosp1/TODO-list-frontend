@@ -10,6 +10,7 @@ export const useAuth = () => {
 function useProvideAuth() {
     const [user, setUser] = useState(null);
 
+    // Responsável pelo login do usuário
     const login = async (usuario, pass) => {
         try {
             const response = await api.loginUser({ username: usuario, password: pass });
@@ -24,12 +25,14 @@ function useProvideAuth() {
         }
     };
 
+    // Responsável pelo logout do usuário
     const logout = () => {
         localStorage.removeItem('authToken'); // Removendo o token JWT
         localStorage.removeItem('authId'); // Removendo o token JWT
         setUser(null);
     };
 
+    // Responsável por chegar o token de autorização
     const checkAuth = async () => {
         const token = localStorage.getItem('authToken');
         if (token) {

@@ -9,6 +9,7 @@ function RegisterForm() {
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
+    // Handler para register do usuário
     const handleRegister = async (e) => {
         e.preventDefault()
         try {
@@ -27,6 +28,7 @@ function RegisterForm() {
         }
     };
 
+    // Handler para logout do usuário
     const handleLogout = () => {
         auth.logout();
         console.log('Usuário deslogado.');

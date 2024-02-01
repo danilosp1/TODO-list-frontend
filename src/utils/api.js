@@ -38,6 +38,7 @@ export const fetchTodoLists = async () => {
             method: 'get',
             url: API_URL + 'todolists/' + userId,
             headers: {
+                Authorization: `Bearer ${token}`
             },
         })
         return response.data;
@@ -55,6 +56,7 @@ export const fetchTodoItem = async (itemId) => {
             method: 'get',
             url: API_URL + 'todoitems/' + itemId,
             headers: {
+                Authorization: `Bearer ${token}`
             },
         })
         return response.data;
@@ -72,6 +74,7 @@ export const fetchTodoItemsAll = async (listId) => {
             method: 'get',
             url: API_URL + 'todoitems/list/' + listId,
             headers: {
+                Authorization: `Bearer ${token}`
             },
         })
         return response.data;
@@ -82,11 +85,13 @@ export const fetchTodoItemsAll = async (listId) => {
 };
 
 export const fetchTodoList = async (listId) => {
+    const token = localStorage.getItem('authToken');
     try {
         const response = await axios({
             method: 'get',
             url: API_URL + 'todoitems/' + listId + '/unique/',
             headers: {
+                Authorization: `Bearer ${token}`
             },
         })
         return response.data
@@ -97,11 +102,13 @@ export const fetchTodoList = async (listId) => {
 }
 
 export const updateTodoList = async (listId, itemsData) => {
+    const token = localStorage.getItem('authToken');
     try {
         const response = await axios({
             method: 'put',
             url: API_URL + 'todolists/' + listId,
             headers: {
+                Authorization: `Bearer ${token}`
             },
             data: itemsData
         })
@@ -113,11 +120,14 @@ export const updateTodoList = async (listId, itemsData) => {
 }
 
 export const createTodoList = async (listData) => {
+    const token = localStorage.getItem('authToken');
     try {
         const response = await axios({
             method: 'post',
             url: API_URL + 'todolists/',
-            headers: {},
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
             data: listData
         })
         return response.data;
@@ -127,11 +137,13 @@ export const createTodoList = async (listData) => {
 }
 
 export const updateTodoitem = async (listId, itemsData) => {
+    const token = localStorage.getItem('authToken');
     try {
         const response = await axios({
             method: 'put',
             url: API_URL + 'todoitems/' + listId,
             headers: {
+                Authorization: `Bearer ${token}`
             },
             data: itemsData
         })
@@ -143,8 +155,16 @@ export const updateTodoitem = async (listId, itemsData) => {
 }
 
 export const updateTodoListOrder = async (listId, itemIds) => {
+    const token = localStorage.getItem('authToken');
     try {
-        const response = await axios.post(`${API_URL}todolists/${listId}/updateOrder`, { itemIds });
+        const response = await axios({
+            method: 'post',
+            url: API_URL + 'todolists/' + listId + '/updateOrder',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            data: itemIds
+        })
         return response.data;
     } catch (error) {
         throw error;
@@ -152,11 +172,14 @@ export const updateTodoListOrder = async (listId, itemIds) => {
 };
 
 export const deleteTodoList = async (listId) => {
+    const token = localStorage.getItem('authToken');
     try {
         const response = await axios({
             method: 'delete',
             url: API_URL + 'todolists/' + listId,
-            headers: {}
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
         })
         return response.data
     } catch (error) {
@@ -165,11 +188,14 @@ export const deleteTodoList = async (listId) => {
 }
 
 export const deleteTodoTask = async (itemId) => {
+    const token = localStorage.getItem('authToken');
     try {
         const response = await axios({
             method: 'delete',
             url: API_URL + 'todoitems/' + itemId,
-            headers: {}
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
         })
         return response.data;
     } catch (error) {
@@ -178,11 +204,14 @@ export const deleteTodoTask = async (itemId) => {
 }
 
 export const createTodoTask = async (itemsData) => {
+    const token = localStorage.getItem('authToken');
     try {
         const response = await axios({
             method: 'post',
             url: API_URL + 'todoitems/',
-            headers: {},
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
             data: itemsData
         })
         return response.data;

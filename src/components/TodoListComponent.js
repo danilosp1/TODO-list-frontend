@@ -3,7 +3,7 @@ import TodoItem from './TodoItem'
 import { Droppable } from 'react-beautiful-dnd'
 import * as api from '../utils/api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPenToSquare , faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import { faPenToSquare, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 
 const TodoList = ({ column, tasks, onDeleteTask, onCreateTask, onDeleteList, onChangeCompleted }) => {
     const [modal, setModal] = useState(false);
@@ -14,6 +14,13 @@ const TodoList = ({ column, tasks, onDeleteTask, onCreateTask, onDeleteList, onC
         return null;
     }
 
+    // Handler para iniciar criação de um item
+    const handleNewTask = () => {
+        setModalType(true);
+        handleOpenModal();
+    }
+
+    // Handler para criar item
     const handleCreateTask = async () => {
         try {
             const item = await api.createTodoTask({ content: inputValue, todoListId: column._id })
@@ -25,6 +32,7 @@ const TodoList = ({ column, tasks, onDeleteTask, onCreateTask, onDeleteList, onC
         handleCloseModal();
     }
 
+    // Handler para login do usuário
     const handleOpenModal = () => {
         setModal(true);
     }
@@ -33,11 +41,8 @@ const TodoList = ({ column, tasks, onDeleteTask, onCreateTask, onDeleteList, onC
         setModal(false);
     }
 
-    const handleNewTask = () => {
-        setModalType(true);
-        handleOpenModal();
-    }
 
+    // Handlers para deletar e atualizar uma list
     const handleDeleteList = async () => {
         try {
             await api.deleteTodoList(column._id);
@@ -49,7 +54,7 @@ const TodoList = ({ column, tasks, onDeleteTask, onCreateTask, onDeleteList, onC
 
     const handleUpdateList = async () => {
         try {
-            await api.updateTodoList(column._id, {title: inputValue})
+            await api.updateTodoList(column._id, { title: inputValue })
             column.title = inputValue;
             setInputValue("")
             handleCloseModal();
@@ -65,11 +70,11 @@ const TodoList = ({ column, tasks, onDeleteTask, onCreateTask, onDeleteList, onC
     }
 
     return (
-        <div className='m-2 border-2 border-quaternary-400 rounded-sm bg-secondary-400 sm:min-w-64 relative min-h-52'>
+        <div className='m-2 border-2 border-quaternary-400 rounded-sm bg-secondary-400 sm:min-w-64 relative min-h-52 max-w-96'>
             {
                 modal ?
                     (
-                        <form onSubmit={(e) => {e.preventDefault(); modalType ? handleCreateTask() : handleUpdateList()}} className='flex flex-col items-center absolute w-full h-full z-10 bg-secondary-200'>
+                        <form onSubmit={(e) => { e.preventDefault(); modalType ? handleCreateTask() : handleUpdateList() }} className='flex flex-col items-center absolute w-full h-full z-10 bg-secondary-200'>
                             <div className='m-2 text-quaternary-400 text-xl font-bold'>{modalType ? "Adicionar item" : "Editar título"}</div>
                             <div className='mb-2 text-quaternary-400 text-base'>{modalType ? "Descrição" : "Título"}</div>
 
