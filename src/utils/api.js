@@ -76,10 +76,25 @@ export const fetchTodoItemsAll = async (listId) => {
         })
         return response.data;
     } catch (error) {
-        console.error("Erro ao buscar as Todo Lists:", error);
+        console.error("Erro ao buscar os Todo Items:", error);
         throw error;
     }
 };
+
+export const fetchTodoList = async (listId) => {
+    try {
+        const response = await axios({
+            method: 'get',
+            url: API_URL + 'todoitems/' + listId + '/unique/',
+            headers: {
+            },
+        })
+        return response.data
+    } catch (error) {
+        console.error("Erro ao buscar a Todo List:", error);
+        throw error;
+    }
+}
 
 export const updateTodoList = async (listId, itemsData) => {
     try {

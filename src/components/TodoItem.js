@@ -5,7 +5,7 @@ import * as api from '../utils/api';
 
 import React, { useState } from 'react';
 
-const TodoItem = ({ task, index, onDeleteTask }) => {
+const TodoItem = ({ task, index, onDeleteTask, onChangeCompleted }) => {
     const [completed, setCompleted] = useState(task.completed)
 
     const styles = {
@@ -17,9 +17,11 @@ const TodoItem = ({ task, index, onDeleteTask }) => {
         try {
             const item = await api.fetchTodoItem(task._id);
 
-            await api.updateTodoitem(task._id, { content: item.content, completed: !item.completed, list: item.list});
+            const novoItem = await api.updateTodoitem(task._id, { content: item.content, completed: !item.completed, list: item.list});
 
             setCompleted(!item.completed);
+            
+            onChangeCompleted(task.list, novoItem);
         } catch (error) {
             console.error("Erro ao alterar status da task:", error);
         }
@@ -29,7 +31,7 @@ const TodoItem = ({ task, index, onDeleteTask }) => {
         try {
             await api.deleteTodoTask(task._id);
 
-            onDeleteTask(task.list, task._id);
+            onDeleteTask(task._id);
         } catch (error) {
             console.error("Erro ao deletar task:", error);
         }

@@ -45,21 +45,29 @@ const Home = () => {
                 for (const key of Object.keys(todoItems)) {
                     const item = todoLists.find((value) => value._id === key);
 
-                    await api.updateTodoList(key, { title: item.title, items: todoItems[key].map(item => item._id) });
+                    await api.updateTodoList(key, { title: item.title, items: todoItems[key].map(value => value._id) });
                 }
 
             } catch (error) {
                 console.error("Erro ao atualizar dados:", error);
             }
         }
-        console.log(todoLists)
+
         updateData();
     }, [todoItems, todoLists])
 
-    const handleDeleteTask = (listId, taskId) => {
+    const handleDeleteTask = async (taskId) => {
+        let taskAtual;
+        for (const key of Object.keys(todoItems)) {
+            if(todoItems[key].find(value => taskId === value._id)){
+                taskAtual = todoItems[key].find(value => taskId === value._id);
+            }
+        }
+
         setTodoItems(prevState => {
             const newList = { ...prevState };
-            newList[listId] = newList[listId].filter(task => task._id !== taskId);
+
+            newList[taskAtual.list] = newList[taskAtual.list].filter(task => task._id !== taskId);
             return newList;
         });
     };
@@ -67,7 +75,6 @@ const Home = () => {
     const handleDeleteList = (listRemoved) => {
         setTodoLists(prevState => {
             const newList = [ ...prevState ];
-            console.log(listRemoved)
             const index = newList.findIndex((item) => item._id === listRemoved._id)
             newList.splice(index, 1);
             return newList;
@@ -82,16 +89,19 @@ const Home = () => {
         })
     }
 
-    const handleCreateList = async () => {
+    const handleCreateList = async (e) => {
+        e.preventDefault()
         try {
             const newList = await api.createTodoList({title: inputValue, userId: userId});
-            console.log(newList);
-            setTodoLists([...todoLists, newList]);
+            setTodoLists(prevTodoLists => [...prevTodoLists, newList]);
+            setTodoItems(prevTodoItems => {
+                const newItems = { ...prevTodoItems };
+                newItems[newList._id] = [];
+                return newItems
+            })
         } catch (error) {
             console.error("Erro ao criar lista:", error)
         }
-        
-        console.log(todoLists)
 
         setInputValue("");
         handleCloseModal();
@@ -103,6 +113,15 @@ const Home = () => {
 
     const handleCloseModal = () => {
         setModal(false);
+    }
+
+    const handleChangeCompleted = (listId, task) => {
+        setTodoItems(prevState => {
+            const newList = { ...prevState };
+            newList[listId] = newList[listId].filter(value => value._id !== task._id);
+            newList[listId].push(task);
+            return newList;
+        });
     }
 
     const onDragEnd = async (result) => {
@@ -156,9 +175,16 @@ const Home = () => {
             setTodoItems(newTodoItems);
 
             try {
-                const item = await api.fetchTodoItem(movedItem._id);
+                const newItem = await api.updateTodoitem(movedItem._id, { content: movedItem.content, completed: movedItem.completed, list: destination.droppableId });
+                
+                setTodoItems(prevState => {
+                    const newList = { ...prevState };
+                    const indexItem = newList[destination.droppableId].findIndex(value => value._id === newItem._id)
+                    newList[destination.droppableId].splice(indexItem, 1, newItem)
 
-                await api.updateTodoitem(item._id, { content: item.content, completed: item.completed, list: destination.droppableId });
+                    return newList;
+                })
+
             } catch (error) {
                 console.error("Erro ao atualizar listas:", error);
             }
@@ -178,7 +204,7 @@ const Home = () => {
                                 todoLists.map((column) => {
                                     const tasks = todoItems[column._id];
                                     if (tasks) {
-                                        return <TodoList key={column._id} column={column} tasks={tasks} onDeleteTask={handleDeleteTask} onCreateTask={handleCreateTask} onDeleteList={handleDeleteList} />
+                                        return <TodoList key={column._id} column={column} tasks={tasks} onDeleteTask={handleDeleteTask} onCreateTask={handleCreateTask} onDeleteList={handleDeleteList} onChangeCompleted={handleChangeCompleted} />
                                     } else {
                                         return <div></div>
                                     }
@@ -188,22 +214,22 @@ const Home = () => {
                                 {
                                     modal ?
                                         (
-                                            <div className='absolute w-full h-full bg-secondary-200 border-2 z-10 border-quaternary-400 rounded-sm flex flex-col items-center'>
+                                            <form onSubmit={handleCreateList} className='min-h-52 absolute w-full h-full bg-secondary-200 border-2 z-10 border-quaternary-400 rounded-sm flex flex-col items-center'>
                                                 <div className='m-2 text-quaternary-400 text-xl'>Adicionar lista</div>
                                                 <div className='mb-2 text-quaternary-400 text-base'>título</div>
 
                                                 <input onChange={(e) => setInputValue(e.target.value)} value={inputValue} className='p-3 rounded-2xl focus:rounded-lg transition-all outline-none text-base' type="text" />
 
                                                 <div className='mt-4 flex flex-row text-text-50 gap-4 text-base'>
-                                                    <button onClick={handleCreateList} className='border-2 border-quaternary-400 bg-secondary-200 hover:bg-tertiary-200 transition-all hover:cursor-pointer hover:rounded-2xl p-2 mb-2 flex items-center justify-center text-center font-bold pt-1 w-full text-quaternary-400'>Adicionar</button>
+                                                    <input type="submit" value="Adicionar" className='border-2 border-quaternary-400 bg-secondary-200 hover:bg-tertiary-200 transition-all hover:cursor-pointer hover:rounded-2xl p-2 mb-2 flex items-center justify-center text-center font-bold pt-1 w-full text-quaternary-400'></input>
 
                                                     <button onClick={handleCloseModal} className='border-2 border-quaternary-400 bg-delete-400 transition-all hover:cursor-pointer hover:rounded-2xl p-2 mb-2 flex items-center justify-center text-center font-bold pt-1 w-full text-text-50'>Cancelar</button>
                                                 </div>
-                                            </div>
+                                            </form>
                                         )
                                         :
                                         (
-                                            <button onClick={handleOpenModal} className='flex items-center justify-center text-center w-full h-full border-2 border-quaternary-400 rounded-sm hover:bg-secondary-200 bg-tertiary-200 transition-all hover:cursor-pointer hover:rounded-2xl'>
+                                            <button onClick={handleOpenModal} className='min-h-52 flex items-center justify-center text-center w-full h-full border-2 border-quaternary-400 rounded-sm hover:bg-secondary-200 bg-tertiary-200 transition-all hover:cursor-pointer hover:rounded-2xl'>
                                                 +
                                             </button>
                                         )

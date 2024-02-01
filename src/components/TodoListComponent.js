@@ -3,10 +3,11 @@ import TodoItem from './TodoItem'
 import { Droppable } from 'react-beautiful-dnd'
 import * as api from '../utils/api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import { faPenToSquare , faTrashCan } from "@fortawesome/free-solid-svg-icons";
 
-const TodoList = ({ column, tasks, onDeleteTask, onCreateTask, onDeleteList }) => {
+const TodoList = ({ column, tasks, onDeleteTask, onCreateTask, onDeleteList, onChangeCompleted }) => {
     const [modal, setModal] = useState(false);
+    const [modalType, setModalType] = useState(false);
     const [inputValue, setInputValue] = useState("");
 
     if (!column) {
@@ -32,6 +33,11 @@ const TodoList = ({ column, tasks, onDeleteTask, onCreateTask, onDeleteList }) =
         setModal(false);
     }
 
+    const handleNewTask = () => {
+        setModalType(true);
+        handleOpenModal();
+    }
+
     const handleDeleteList = async () => {
         try {
             await api.deleteTodoList(column._id);
@@ -41,23 +47,40 @@ const TodoList = ({ column, tasks, onDeleteTask, onCreateTask, onDeleteList }) =
         }
     }
 
+    const handleUpdateList = async () => {
+        try {
+            await api.updateTodoList(column._id, {title: inputValue})
+            column.title = inputValue;
+            setInputValue("")
+            handleCloseModal();
+        } catch (error) {
+            console.error("Erro ao editar lista:", error)
+        }
+    }
+
+    const handleEditList = async () => {
+        setModalType(false);
+        setInputValue(column.title)
+        handleOpenModal();
+    }
+
     return (
         <div className='m-2 border-2 border-quaternary-400 rounded-sm bg-secondary-400 sm:min-w-64 relative min-h-52'>
             {
                 modal ?
                     (
-                        <div className='flex flex-col items-center absolute w-full h-full z-10 bg-secondary-200'>
-                            <div className='m-2 text-quaternary-400 text-xl'>Adicionar item</div>
-                            <div className='mb-2 text-quaternary-400 text-base'>Descrição</div>
+                        <form onSubmit={(e) => {e.preventDefault(); modalType ? handleCreateTask() : handleUpdateList()}} className='flex flex-col items-center absolute w-full h-full z-10 bg-secondary-200'>
+                            <div className='m-2 text-quaternary-400 text-xl font-bold'>{modalType ? "Adicionar item" : "Editar título"}</div>
+                            <div className='mb-2 text-quaternary-400 text-base'>{modalType ? "Descrição" : "Título"}</div>
 
                             <input onChange={(e) => setInputValue(e.target.value)} value={inputValue} className='p-3 rounded-2xl focus:rounded-lg transition-all outline-none' type="text" />
 
                             <div className='mt-4 flex flex-row text-text-50 gap-4'>
-                                <button onClick={handleCreateTask} className='border-2 border-quaternary-400 bg-secondary-200 hover:bg-tertiary-200 transition-all hover:cursor-pointer hover:rounded-2xl p-2 mb-2 flex items-center justify-center text-center font-bold pt-1 w-full text-quaternary-400'>Adicionar</button>
+                                <input type="submit" value={"Concluir"} className='border-2 border-quaternary-400 bg-secondary-200 hover:bg-tertiary-200 transition-all hover:cursor-pointer hover:rounded-2xl p-2 mb-2 flex items-center justify-center text-center font-bold pt-1 w-full text-quaternary-400'></input>
 
                                 <button onClick={handleCloseModal} className='border-2 border-quaternary-400 bg-delete-400 transition-all hover:cursor-pointer hover:rounded-2xl p-2 mb-2 flex items-center justify-center text-center font-bold pt-1 w-full text-text-50'>Cancelar</button>
                             </div>
-                        </div>
+                        </form>
                     )
                     :
                     (
@@ -69,6 +92,7 @@ const TodoList = ({ column, tasks, onDeleteTask, onCreateTask, onDeleteList }) =
                     {column.title}
                 </div>
                 <div>
+                    <button onClick={handleEditList} className='text-quaternary-400 hover:text-primary-400 text-xl m-1 ml-2'><FontAwesomeIcon icon={faPenToSquare} /></button>
                     <button onClick={handleDeleteList} className='text-quaternary-400 hover:text-delete-400 text-xl m-1'><FontAwesomeIcon icon={faTrashCan} /></button>
                 </div>
             </div>
@@ -79,9 +103,11 @@ const TodoList = ({ column, tasks, onDeleteTask, onCreateTask, onDeleteList }) =
                         {...provided.droppableProps}
                         className='p-2 text-quaternary-400 text-xl'
                     >
-                        {tasks.map((task, index) => <TodoItem key={task._id} task={task} index={index} onDeleteTask={onDeleteTask}></TodoItem>)}
+                        {tasks.map((task, index) => <TodoItem key={task._id} task={task} index={index} onDeleteTask={onDeleteTask} onChangeCompleted={onChangeCompleted}></TodoItem>)}
+
                         {provided.placeholder}
-                        <button onClick={handleOpenModal} className='border-2 border-quaternary-400 bg-secondary-200 hover:bg-tertiary-200 transition-all hover:cursor-pointer hover:rounded-2xl p-2 mb-2 flex items-center justify-center text-center font-bold pt-1 w-full'>
+
+                        <button onClick={handleNewTask} className='border-2 border-quaternary-400 bg-secondary-200 hover:bg-tertiary-200 transition-all hover:cursor-pointer hover:rounded-2xl p-2 mb-2 flex items-center justify-center text-center font-bold pt-1 w-full'>
                             +
                         </button>
                     </div>
